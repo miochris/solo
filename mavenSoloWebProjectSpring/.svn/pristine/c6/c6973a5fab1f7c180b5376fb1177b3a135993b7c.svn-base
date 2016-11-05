@@ -1,0 +1,27 @@
+package com.fdmgroup.market.listeners;
+
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.entity.Fighter;
+
+public class FighterNameValidationListener {
+	public static final Logger LOG = Logger
+			.getLogger(FighterNameValidationListener.class);
+
+	@PrePersist
+	@PreUpdate
+	private void validate(Fighter fighter) {
+
+		if (fighter.getName() == null
+				|| "".equals(fighter.getName().replaceAll("\\s", ""))) {
+			LOG.error("Please provide a valid name!");
+			throw new IllegalArgumentException("Innvalid name");
+
+		}
+
+	}
+
+}

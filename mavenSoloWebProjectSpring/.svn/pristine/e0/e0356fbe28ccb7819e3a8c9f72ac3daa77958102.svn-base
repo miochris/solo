@@ -1,0 +1,31 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
+    <%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="sf" uri="http://www.springframework.org/tags/form"%>
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+<sf:form action="register" method ="post" modelAttribute="member">
+<label>Member/Admin Name<sf:input type="text" path ="name" /></label> <br/>
+<label>Tup up your account<sf:input type="text" path ="balance" /></label> <br/>
+<label>City<sf:input type="text" path ="address.city" /></label> <br/>
+<label>Postcode<sf:input type="text" path ="address.postcode" /></label> <br/>
+<label>Street<sf:input type="text" path ="address.street" /></label> <br/>
+
+<label>Password<sf:input type="text" path ="password" /></label> <br/>
+<label>date Of Birth<sf:input type="text" path ="dateOfBirth" /></label> <br/>
+<label>Role<sf:input type="text" path ="role" /></label> <br/>
+
+
+<input type="submit" value ="Register" name ="submit"/> <br/>
+ 
+
+
+</sf:form>
+
+</body>
+</html>

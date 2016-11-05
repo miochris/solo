@@ -1,0 +1,60 @@
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+	pageEncoding="ISO-8859-1"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+
+	Here are all members
+
+
+
+	<table style="width: 100%">
+	
+		<tr>
+			<th>member id</th>
+			<th>name</th>
+	
+			<th>city</th>
+			<th>balance</th>
+
+			<th>age</th>
+		
+			<th>password</th>
+
+
+		</tr>
+
+
+
+		<c:forEach items="${memberList}" var="member">
+
+			<tr>
+				<td align="center"><c:out value="${member.id}" /></td>
+				<td align="center"><c:out value="${member.name}" /></td>
+		
+				<td align="center"><c:out value="${member.address.city}" /></td>
+				<td align="center"><c:out value="${member.balance}" /></td>
+	
+				<td align="center"><c:out value="${member.age}" /></td>
+			
+				<td align="center"><c:out value="${member.password}" /></td>
+			</tr>
+		</c:forEach>
+
+
+
+</table>
+
+
+		<!-- home page -->
+		<a href="AdminHome">Admin home</a>
+		<br>
+</body>
+</html>

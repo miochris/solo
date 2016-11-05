@@ -1,0 +1,121 @@
+package com.fdmgroup.market.servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManagerFactory;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.dao.FighterDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Cat;
+import com.fdmgroup.market.entity.Dog;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.enums.City;
+
+/**
+ * Servlet implementation class MemberRegisterServlet
+ */
+public class MemberServlet extends HttpServlet {
+	public static final Logger LOG = Logger.getLogger(MemberServlet.class);
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+
+		EntityManagerFactory enMgFac = (EntityManagerFactory) getServletContext()
+				.getAttribute("enMgFac");
+
+		HttpSession session = request.getSession();
+
+		MemberDAO daoM = new MemberDAO(enMgFac);
+		FighterDAO daoF = new FighterDAO(enMgFac);
+		String nextPage = null;
+		String submitType = request.getParameter("Submit");
+
+		String userName = (String) session.getAttribute("userName");
+
+		Member memberLoggedIn = daoM.getMemberByName(userName);
+
+		LOG.info(memberLoggedIn);
+
+		// show your fighter list
+		if (submitType.equals("AllFighterList")) {
+			List<Fighter> OneMembersFighterList = new ArrayList<Fighter>();
+			OneMembersFighterList = daoM.listAllFightersofOneMember(String
+					.valueOf(memberLoggedIn.getId()));
+			session.setAttribute("OneMembersFighterList", OneMembersFighterList);
+			nextPage = "/member/OwnFighterList.jsp";
+		}
+
+		// add fighter
+
+		if (submitType.equals("AddFighter")) {
+			String fighterType = request.getParameter("fighterType");
+			String name = request.getParameter("name");
+			int nOfW = Integer.parseInt(request.getParameter("nOfW"));
+			int nOfL = Integer.parseInt(request.getParameter("nOfL"));
+			int speed = Integer.parseInt(request.getParameter("speed"));
+			Double price = Double.parseDouble(request.getParameter("price"));
+			if (fighterType.equals("cat")) {
+				System.out.println(fighterType + "8888888888888888888888");
+				Cat newAddedFighter = new Cat(name, nOfW, nOfL, speed, price);
+				daoF.addCat(newAddedFighter);
+				daoM.addFighterToNewMember(newAddedFighter, memberLoggedIn);
+				session.setAttribute("newAddedFighter", newAddedFighter);
+			}
+			if (fighterType.equals("dog")) {
+				Dog newAddedFighter = new Dog(name, nOfW, nOfL, speed, price);
+				daoF.addDog(newAddedFighter);
+				daoM.addFighterToNewMember(newAddedFighter, memberLoggedIn);
+				LOG.info("owner's id: " + newAddedFighter.getMember().getId());
+				session.setAttribute("newAddedFighter", newAddedFighter);
+			}
+
+			nextPage = "MemberHome.html";
+		}
+
+		// list fighters in your city for member
+		if (submitType.equals("OtherFightersInYourCity")) {
+			City city = memberLoggedIn.getAddress().getCity();
+			List<Fighter> FightersInYourCity = daoM.FightersInYourCity(city,
+					memberLoggedIn.getId());
+			session.setAttribute("FightersInYourCity", FightersInYourCity);
+			nextPage = "/member/fightersInMembersOwnCity.jsp";
+
+		}
+		// String showFightersInYourCity =
+		if (submitType.equals("buyNewFighter")) {
+			Member member = (Member) session.getAttribute("memberForList");
+			LOG.info("member id ************  " + member.getId());
+			String city = member.getAddress().getCity().toString();
+			List<Integer> FightersInYourCityInt = new ArrayList<Integer>();
+			List<Fighter> FightersInYourCity = new ArrayList<Fighter>();
+			for (int fId : FightersInYourCityInt) {
+				FightersInYourCity.add(daoF.getFighter(fId));
+			}
+			session.setAttribute("FightersInYourCity", FightersInYourCity);
+			session.setAttribute("city", city);
+			nextPage = "/member/fightersInMembersOwnCity.jsp";
+
+		}
+		// log out
+		if (submitType.equals("LogOut")) {
+			session.invalidate();
+			nextPage = "../index.jsp";
+		}
+
+		RequestDispatcher dispatcher = request.getRequestDispatcher(nextPage);
+		dispatcher.forward(request, response);
+
+	}
+}

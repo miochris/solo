@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+<!-- add new member -->	
+<a href="admin/AddNewMember.jsp">admin</a><br> 
+
+
+<!-- show Fighter list -->	
+
+	<form action="AdminServlet" method="post">
+
+		show member's fighter list<input name="memberId" /> <br> <input
+			type="Submit" name="Submit" value="FighterList" />
+	</form>
+
+	<form action="AdminServlet" method="post">
+
+		<br> <input type="Submit" name="Submit" value="LogOut" />
+	</form>
+	
+	
+<!-- show Fighters in One city -->		
+		<form action="AdminServlet" method="post">
+
+		show  fighter in same city <input name="city" /> <br> 
+		
+		<input type="Submit" name = "Submit" value="FightersInSameCity" />
+	</form>
+	
+	
+	<!-- Log out -->
+	
+	<form action="AdminServlet" method="post">
+
+		
+		
+		<input type="Submit" name = "Submit" value="LogOut" />
+	</form>
+</body>
+</html>

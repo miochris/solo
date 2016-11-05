@@ -1,0 +1,57 @@
+package com.fdmgroup.market.servlet;
+
+import java.io.IOException;
+
+import javax.persistence.EntityManagerFactory;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.dao.FighterDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+
+/**
+ * Servlet implementation class FightServlet
+ */
+public class FightChooseOppoServlet extends HttpServlet {
+	public static final Logger LOG = Logger.getLogger(FightChooseOppoServlet.class);
+	private static final long serialVersionUID = 1L;
+       
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	LOG.info("read 1 *************************************");
+		EntityManagerFactory enMgFac = (EntityManagerFactory) getServletContext()
+				.getAttribute("enMgFac");
+
+		HttpSession session = request.getSession();
+		LOG.info("read 2 *************************************");
+		MemberDAO daoM = new MemberDAO(enMgFac);
+		FighterDAO daoF = new FighterDAO(enMgFac);
+		String nextPage = "/member/ChooseMyFighter.jsp";
+		String userName = (String) session.getAttribute("userName");
+		Member memberLoggedIn = daoM.getMemberByName(userName);
+		String fighterId = request.getParameter("oppoFighterId");
+		LOG.info(fighterId);
+		Fighter fighterToFight = daoF.getFighter(Integer.parseInt(fighterId));
+		session.setAttribute("memberLoggedIn", memberLoggedIn);
+		LOG.info("member:   "+memberLoggedIn);
+		session.setAttribute("fighterToFight", fighterToFight);
+		LOG.info("fighter oppo:   "+fighterToFight);
+		LOG.info("read 3 *************************************");
+		RequestDispatcher dispatcher = request.getRequestDispatcher("/member/PickMyFighter.jsp");
+		dispatcher.forward(request, response);
+	}
+
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	
+	
+	
+	}
+
+}

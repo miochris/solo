@@ -1,0 +1,250 @@
+package com.fdmgroup.market.dao;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Cat;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+
+public class MemberDAO {
+	public static final Logger LOG = Logger.getLogger(MemberDAO.class);
+
+	private EntityManager enMg;
+
+	public MemberDAO() {
+	}
+
+	public MemberDAO(EntityManager enMg) {
+		super();
+		this.enMg = enMg;
+	}
+
+	public void addNewMember(Member member) {
+
+		enMg.persist(member);
+		LOG.info("added new member " + member);
+	}
+
+	public Member getMemberById(int mId) {
+		Member member = enMg.find(Member.class, mId);
+		return member;
+	}
+
+	public void addFighterToNewMember(Fighter fighter, Member member) {
+		Member newMember = member;
+
+		Member merged = enMg.merge(newMember);
+
+		newMember.addFighter(fighter);
+
+		LOG.info("newmember list size after "
+				+ newMember.getFighterList().size());
+		LOG.info("member list size after " + member.getFighterList().size());
+
+	}
+
+	public List showListOfFighters(int mId) {
+		Member member = enMg.find(Member.class, mId);
+		List fighters = member.getFighterList();
+		LOG.info("fighter numbers " + fighters.size());
+		return fighters;
+
+	}
+
+	public void setDoB(Date dob, Member member) {
+		Member newMember = member;
+		Member merged = enMg.merge(newMember);
+		newMember.setDateOfBirth(dob);
+		LOG.info(member);
+	}
+
+	public void changeBalanceAfterFight(Member member1, Member member2,
+			boolean result) {
+
+		if (result == true) {
+			changeMemberBalance(member1, 2000);
+			changeMemberBalance(member2, -2000);
+		} else {
+			changeMemberBalance(member1, 2000);
+			changeMemberBalance(member2, -2000);
+		}
+	}
+
+	private void changeMemberBalance(Member member, double gain) {
+		double balanceBeforeFight = member.getBalance();
+		double balanceAfterFight = balanceBeforeFight + gain;
+		setBalance(member, balanceAfterFight);
+
+	}
+
+	public void setBalance(Member member, double balance) {
+		Member newMember = member;
+		Member merged = enMg.merge(newMember);
+		newMember.setBalance(balance);
+		LOG.info(member.getId() + "'s new balance is: " + balance);
+
+	}
+
+	public void setAddress(Member member, Address address) {
+
+		AddressDAO daoA = new AddressDAO(enMg);
+		daoA.addAddressToMember(address, member);
+
+	}
+
+	public void listMembersInOneCity(String city) {
+		// City cityToFind=City.findCity(city);
+		Query query = enMg
+				.createNativeQuery("select member_id from address where city = ?");
+		query.setParameter(1, city);
+		List<BigDecimal> membersInOneCity = (List<BigDecimal>) query
+				.getResultList();
+		for (BigDecimal mId : membersInOneCity) {
+			LOG.info(mId);
+		}
+
+	}
+
+	public List<Integer> FightersInOneCity(String city) {
+		List<Integer> fightersInOneCityInt = new ArrayList<Integer>();
+
+		Query query = enMg.createNativeQuery(
+				"select c.id from cat c "
+				+ "inner join member m "
+				+ "on c.member_id= m.id "
+				+ "inner join address a 	"
+				+ "on m.ADDRESS_ID=a.id "
+				+ "where a.city=?	" 
+				+ "union all	"
+				+ "select  d.id from dog d	" 
+				+ "inner join member m "
+				+ "on d.member_id= m.id " 
+				+ "inner join address a	"
+				+ "on m.ADDRESS_ID=a.id " 
+				+ "where a.city=? " + "order by id");
+		query.setParameter(1, city);
+		query.setParameter(2, city);
+		List<BigDecimal> fightersInOneCityBD = (List<BigDecimal>) query
+				.getResultList();
+		for (BigDecimal fId : fightersInOneCityBD) {
+			fightersInOneCityInt.add(fId.intValueExact());
+			LOG.info(fId.intValueExact());
+		}
+		return fightersInOneCityInt;
+
+	}
+
+	public List<Integer> FightersInYourCity(String city, int yourId) {
+		List<Integer> fighersInOneCityInt = new ArrayList<Integer>();
+
+		 Query  query=  enMg.createNativeQuery(
+				"select  c.id from cat c "
+				+ "inner join member m "
+				+ "on c.member_id= m.id "
+				+ "inner join address a " 
+				+ "on m.ADDRESS_ID=a.id "
+				+ "where a.city=? " 
+				+ "and c.member_id <> ? "
+				+ "union all " 
+				+ "select  d.id from dog d "
+				+ "inner join member m "
+				+ "on d.member_id= m.id "
+				+ "inner join address a "  
+				+ "on m.ADDRESS_ID=a.id "
+				+ "where a.city=? " 
+				+ "and d.member_id<> ? "
+				+ "order by id "
+				);
+		query.setParameter(1, city);
+		query.setParameter(2, yourId);
+		query.setParameter(3, city);
+		query.setParameter(4, yourId);
+		
+		
+		List<BigDecimal> fightersInOneCityBD = (List<BigDecimal>) query.getResultList();
+		for (BigDecimal fId : fightersInOneCityBD) {
+			fighersInOneCityInt.add(fId.intValueExact());
+			LOG.info(fId.intValueExact());
+		}
+		return fighersInOneCityInt;
+
+	}
+
+	public List<Integer> showAllMembers() {
+		List<Integer> memberListInt = new ArrayList<Integer>();
+//		List<Member> memberList= new ArrayList<Member>();
+		 Query  query=  enMg.createNativeQuery(
+				 "select id from member");
+		 
+		 List<BigDecimal> memberListBD = (List<BigDecimal>) query.getResultList(); 
+		 for (BigDecimal mId : memberListBD) {
+			 memberListInt.add(mId.intValueExact());
+		 }
+		 
+		return memberListInt;
+	}
+
+	public List<Integer> listAllFighters() {
+		
+		
+		List<Integer> fightersInt = new ArrayList<Integer>();
+
+		 Query  query=  enMg.createNativeQuery(
+				"select  c.id from cat c "
+				+ "union all " 
+				+ "select  d.id from dog d "
+				+ "order by id "
+				);
+		
+		
+		 List<BigDecimal> fightersBD = (List<BigDecimal>) query.getResultList();
+			for (BigDecimal fId : fightersBD) {
+				fightersInt.add(fId.intValueExact());
+				LOG.info(fId.intValueExact());
+			}
+			return fightersInt;
+		
+		
+		
+		
+	}
+
+	public List<Integer> listAllFightersofOneMember(String memberId) {
+		List<Integer> OneMembersFighterList = new ArrayList<Integer>();
+
+		Query query = enMg.createNativeQuery(
+				"select c.id from cat c "
+				+ "inner join member m "
+				+ "on c.member_id= m.id "
+				+ "inner join address a 	"
+				+ "on m.ADDRESS_ID=a.id "
+				+ "where c.member_id=?	"
+				
+				+ "union all	"
+				+ "select  d.id from dog d	" 
+				+ "inner join member m "
+				+ "on d.member_id= m.id " 
+				+ "inner join address a	"
+				+ "on m.ADDRESS_ID=a.id " 
+				+ "where c.member_id=? " + "order by id");
+		query.setParameter(1, memberId);
+		query.setParameter(2, memberId);
+		List<BigDecimal> fightersInOneCityBD = (List<BigDecimal>) query
+				.getResultList();
+		for (BigDecimal fId : fightersInOneCityBD) {
+			OneMembersFighterList.add(fId.intValueExact());
+			LOG.info(fId.intValueExact());
+		}
+		return OneMembersFighterList;
+	}
+}

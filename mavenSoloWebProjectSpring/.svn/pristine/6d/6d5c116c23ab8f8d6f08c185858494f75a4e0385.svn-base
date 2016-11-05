@@ -1,0 +1,179 @@
+package com.fdmgroup.market.entity;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Inheritance;
+import javax.persistence.InheritanceType;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import com.fdmgroup.market.listeners.StrengthCalculator;
+
+@Entity
+@EntityListeners({
+
+StrengthCalculator.class })
+// @Table(name = "Fighter")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public abstract class Fighter implements Serializable {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@Column
+	private int id;
+	@Column
+	private String name;
+
+	@Column
+	private int nOfW;
+
+	@Column
+	private int nOfL;
+
+	@Column
+	private int speed; // from 1-10
+
+	@Column
+	private double price;
+
+	@Column
+	private int strength;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "dateAdded", insertable = true, updatable = false)
+	private Date dateAdded;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "dateUpdated", insertable = true, updatable = true)
+	private Date dateUpdated;
+	@ManyToOne
+	@JoinColumn
+	private Member member;
+
+	@PrePersist
+	void onCreate() {
+		dateUpdated = dateAdded = new Date();
+	}
+
+	@PreUpdate
+	protected void onUpdate() {
+		dateUpdated = new Date();
+	}
+
+	public Fighter() {
+	}
+
+	public Fighter(String name, int nOfW, int nOfL, int speed, double price) {
+
+		this.name = name;
+		this.nOfW = nOfW;
+		this.nOfL = nOfL;
+		this.speed = speed;
+		this.price = price;
+
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getnOfW() {
+		return nOfW;
+	}
+
+	public void setnOfW(int nOfW) {
+		this.nOfW = nOfW;
+	}
+
+	public int getnOfL() {
+		return nOfL;
+	}
+
+	public void setnOfL(int nOfL) {
+		this.nOfL = nOfL;
+	}
+
+	public int getSpeed() {
+		return speed;
+	}
+
+	public void setSpeed(int speed) {
+		this.speed = speed;
+	}
+
+	public double getPrice() {
+		return price;
+	}
+
+	public void setPrice(double price) {
+		this.price = price;
+	}
+
+	public int getStrehgth() {
+		return strength;
+	}
+
+	public void setStrehgth(int strength) {
+		this.strength = strength;
+	}
+
+	public Date getDateAdded() {
+		return dateAdded;
+	}
+
+	public void setDateAdded(Date dateAdded) {
+		this.dateAdded = dateAdded;
+	}
+
+	public Date getDateUpdated() {
+		return dateUpdated;
+	}
+
+	public void setDateUpdated(Date dateUpdated) {
+		this.dateUpdated = dateUpdated;
+	}
+
+	public Member getMember() {
+		return member;
+	}
+
+	public void setMember(Member member) {
+		this.member = member;
+	}
+
+	public String getType() {
+		return "lala";
+	}
+
+	@Override
+	public String toString() {
+		return "Fighter [id=" + id + ", name=" + name + ", nOfW=" + nOfW
+				+ ", nOfL=" + nOfL + ", speed=" + speed + ", price=" + price
+				+ ", strength=" + strength + ", dateAdded=" + dateAdded
+				+ ", dateUpdated=" + dateUpdated + ", member=" + member + "]";
+	}
+
+}

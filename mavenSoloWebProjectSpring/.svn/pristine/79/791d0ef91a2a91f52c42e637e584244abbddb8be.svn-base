@@ -1,0 +1,77 @@
+package com.fdmgroup.market.dao;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.enums.City;
+
+public class AddressDAO {
+	private EntityManagerFactory enMgFac;
+	
+	
+	
+
+	public AddressDAO(EntityManagerFactory enMgFac) {
+		super();
+		this.enMgFac = enMgFac;
+	}
+
+
+	public void addAddress(Address address) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		enMg.persist(address);
+		enMg.getTransaction().commit();
+		enMg.close();
+	}
+
+	public void deleteAddress(int aId) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		Address address = enMg.find(Address.class, aId);
+		enMg.remove(address);
+		enMg.getTransaction().commit();
+		enMg.close();
+	}
+
+	public Address getAddressById(int aId) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		Address address = enMg.find(Address.class, aId);
+		enMg.close();
+		return address;
+	}
+
+	public void updateAddress(Address address) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		enMg.merge(address);
+		enMg.getTransaction().commit();
+		enMg.close();
+	}
+
+//	public void updatePostcode(int aId, String postcode) {
+//		EntityManager enMg = enMgFac.createEntityManager();
+//		Address address = enMg.find(Address.class, aId);
+//		address.setPostcode(postcode);
+//		enMg.close();
+//	}
+//
+//	public void updateCity(int aId, City city) {
+//		EntityManager enMg = enMgFac.createEntityManager();
+//		Address address = enMg.find(Address.class, aId);
+//		address.setCity(city);
+//		enMg.close();
+//	}
+//
+	public void addAddressToMember(Address address, Member member) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		address.setMember(member);
+		enMg.merge(address);
+		enMg.getTransaction().commit();
+		enMg.close();
+	}
+
+}

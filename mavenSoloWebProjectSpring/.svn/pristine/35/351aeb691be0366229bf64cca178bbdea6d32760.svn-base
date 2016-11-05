@@ -1,0 +1,187 @@
+package com.fdmgroup.market.dao;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
+import org.apache.log4j.Logger;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.enums.City;
+
+public class MemberDAO {
+	public static final Logger LOG = Logger.getLogger(MemberDAO.class);
+
+	@PersistenceContext 
+	private EntityManager enMg;
+
+	public MemberDAO() {
+	}
+	public MemberDAO(EntityManager enMg) {
+		this.enMg=enMg;
+	}
+
+	@Transactional
+	public void addNewMember(Member member) {
+		enMg.persist(member);
+		LOG.info("New member added: " + member.getName());
+	}
+
+	@Transactional
+	public Member getMemberById(int mId) {
+		return enMg.find(Member.class, mId);
+	}
+
+	@Transactional
+	public void addFighterToNewMember(Fighter fighter, Member member) {
+		member.addFighter(fighter);
+		enMg.merge(member);
+
+	}
+
+	@Transactional
+	public List<Fighter> showListOfFighters(int mId) {
+		Member member = enMg.find(Member.class, mId);
+		List<Fighter> fighters = member.getFighterList();
+		LOG.info("fighter numbers " + fighters.size());
+		return fighters;
+
+	}
+
+	@Transactional
+	public void changeBalanceAfterFight(Member member1, Member member2,
+			boolean result) {
+
+		if (result == true) {
+			changeMemberBalance(member1, 2000);
+			changeMemberBalance(member2, -2000);
+		} else {
+			changeMemberBalance(member1, 2000);
+			changeMemberBalance(member2, -2000);
+		}
+
+	}
+
+	@Transactional
+	public void changeMemberBalance(Member member, double gain) {
+		double balanceBeforeFight = member.getBalance();
+		double balanceAfterFight = balanceBeforeFight + gain;
+		member.setBalance(balanceAfterFight);
+		enMg.merge(member);
+	}
+
+	@Transactional
+	public void listMembersInOneCity(String city) {
+		// City cityToFind=City.findCity(city);
+		Query query = enMg
+				.createNativeQuery("select member_id from address where city = ?");
+		query.setParameter(1, city);
+		List<BigDecimal> membersInOneCity = (List<BigDecimal>) query
+				.getResultList();
+		for (BigDecimal mId : membersInOneCity) {
+			LOG.info(mId);
+		}
+	}
+
+	@Transactional
+	public List<Fighter> FightersInOneCity(String city) {
+		City c = City.valueOf(city);
+
+		TypedQuery<Fighter> query = enMg.createQuery(
+				"select f from Fighter f where f.member.address.city=:city",
+				Fighter.class);
+		query.setParameter("city", c);
+		List<Fighter> fightersInOneCity = query.getResultList();
+
+		return fightersInOneCity;
+
+	}
+
+	@Transactional
+	public List<Fighter> FightersInYourCity(City city, int yourId) {
+		TypedQuery<Fighter> query = enMg
+				.createQuery(
+						"select f from Fighter f where f.member.address.city=:city and f.member <> :member",
+						Fighter.class);
+		query.setParameter("city", city);
+		query.setParameter("member", getMemberById(yourId));
+		List<Fighter> fighersInYourCity = query.getResultList();
+
+		return fighersInYourCity;
+
+	}
+
+	@Transactional
+	public List<Member> showAllMembers() {
+		TypedQuery<Member> query = (TypedQuery<Member>) enMg.createQuery(
+				"select m from Member m", Member.class);
+		List<Member> memberList = query.getResultList();
+		return memberList;
+	}
+
+	@Transactional
+	public List<Fighter> listAllFighters() {
+		TypedQuery<Fighter> query = (TypedQuery<Fighter>) enMg.createQuery(
+				"select  f from Fighter f ", Fighter.class);
+		List<Fighter> fighterList = query.getResultList();
+		return fighterList;
+	}
+
+	@Transactional
+	public List<Fighter> listAllFightersofOneMember(String memberId) {
+		Member member = getMemberById(Integer.parseInt(memberId));
+		TypedQuery<Fighter> query = enMg.createQuery(
+				" select f from Fighter f where f.member = :member",
+				Fighter.class);
+		query.setParameter("member", member);
+
+		List<Fighter> fighterList = query.getResultList();
+
+		return fighterList;
+	}
+
+	@Transactional
+	public void addAddressToMember(Address address, Member member) {
+		member.setAddress(address);
+		enMg.merge(member);
+	}
+
+	@Transactional
+	public Member getMemberByName(String userName) {
+		TypedQuery<Member> query = enMg.createQuery(
+				" select m from Member  m where m.name= :name", Member.class);
+		query.setParameter("name", userName);
+		Member member = query.getSingleResult();
+		return member;
+	}
+
+	@Transactional
+	public void buyFighter(Fighter fighterToBuy, Member member) {
+		changeMemberBalance(member, -fighterToBuy.getPrice());
+		changeMemberBalance(fighterToBuy.getMember(), fighterToBuy.getPrice());
+		addFighterToNewMember(fighterToBuy, member);
+
+	}
+
+	@Transactional
+	public List<Integer> showAllMembersID() {
+		TypedQuery<Member> query = (TypedQuery<Member>) enMg.createQuery(
+				"select m from Member m", Member.class);
+		List<Member> memberList = query.getResultList();
+		List<Integer> memberListNum = new ArrayList<Integer>();
+		for (Member m : memberList) {
+			memberListNum.add(m.getId());
+		} 
+		return memberListNum;
+	}
+
+}

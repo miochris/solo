@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<!-- 
+	<form action="MemberRegisterServlet" method="post">
+
+		Name<input name="name" /> <br> 
+		Top up <input name="balance" /><br>
+		<input type="Submit" name = "Submit" value="Register" />
+	</form><br>
+	
+	 -->
+		<form action="MemberRegisterServlet" method="post">
+
+		show member's fighter list<input name="memberId" /> <br> 
+		
+		<input type="Submit" name = "Submit" value="FighterList" />
+	</form>
+	
+	 
+	 
+	
+</body>
+</html>

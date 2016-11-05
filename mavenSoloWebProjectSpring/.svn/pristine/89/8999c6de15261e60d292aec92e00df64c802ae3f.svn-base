@@ -1,0 +1,191 @@
+package com.fdmgroup.market.servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.fdmgroup.market.controller.Controller;
+import com.fdmgroup.market.dao.AddressDAO;
+import com.fdmgroup.market.dao.FighterDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.enums.City;
+import com.fdmgroup.market.enums.Role;
+
+/**
+ * Servlet implementation class AdminServlet
+ */
+public class AdminServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+
+		EntityManagerFactory enMgFac = (EntityManagerFactory) getServletContext()
+				.getAttribute("enMgFac");
+		EntityManager enMg = enMgFac.createEntityManager();
+		EntityTransaction tx = enMg.getTransaction();
+
+		HttpSession session = request.getSession();
+
+		MemberDAO daoM = new MemberDAO(enMg);
+		FighterDAO daoF = new FighterDAO(enMg);
+		AddressDAO daoA = new AddressDAO(enMg);
+		String nextPage = null;
+		tx.begin();
+
+		String submitType = request.getParameter("Submit");
+
+		// add member
+
+		if (submitType.equals("Register")) {
+			String name = request.getParameter("name");
+			String balance = request.getParameter("balance");
+			String street = request.getParameter("street");
+			String postcode = request.getParameter("postcode");
+			String city = request.getParameter("city");
+			String password = request.getParameter("password");
+
+			Member member = new Member(name, Double.parseDouble(balance),
+					password);
+			Address address = new Address(street, postcode,  City.valueOf(city));
+			daoM.addNewMember(member);
+			daoA.addAddressToMember(address, member);
+			tx.commit();
+			enMg.close();
+			// session.setAttribute("registededMember", member);
+			nextPage = "/admin/AdminHome.html";
+
+		}
+
+		// add admin
+
+		if (submitType.equals("RegisterAdmin")) {
+			String name = request.getParameter("name");
+			String balance = request.getParameter("balance");
+			String street = request.getParameter("street");
+			String postcode = request.getParameter("postcode");
+			String city = request.getParameter("city");
+			String password = request.getParameter("password");
+			String role = request.getParameter("role");
+
+			Member member = new Member(name, Double.parseDouble(balance),
+					password);
+			member.setRole(Role.admin);
+			
+			Address address = new Address(street, postcode, City.valueOf(city));
+			daoM.addNewMember(member);
+			daoA.addAddressToMember(address, member);
+			tx.commit();
+			enMg.close();
+			nextPage = "/admin/AdminHome.html";
+
+		}
+		// show all members
+
+		if (submitType.equals("AllMemberList")) {
+			List<Member> memberList = new ArrayList<Member>();
+			List<Integer> memberListInt = new ArrayList<Integer>();
+			memberListInt = daoM.showAllMembers();
+			for (int id : memberListInt) {
+				memberList.add(daoM.getMemberById(id));
+			}
+
+			tx.commit();
+			enMg.close();
+			session.setAttribute("AllmemberList", memberList);
+			nextPage = "/admin/memberList.jsp";
+
+		}
+
+		// show all fighters
+		if (submitType.equals("AllFighterList")) {
+			List<Integer> fighersInt = new ArrayList<Integer>();
+			List<Fighter> AllFighterList = new ArrayList<Fighter>();
+			
+			
+			fighersInt = daoM.listAllFighters();
+			for (int fId : fighersInt) {
+				AllFighterList.add(daoF.getFighter(fId));
+
+			}
+
+			tx.commit();
+			enMg.close();
+			session.setAttribute("AllFighterList", AllFighterList);
+			nextPage = "/admin/FighterList.jsp";
+
+		}
+		
+
+		// show one member's fighter list
+		if (submitType.equals("OneMembersFighterList")) {
+			String memberId = request.getParameter("member");
+			List<Integer> fighersInt = new ArrayList<Integer>();
+			List<Fighter> OneMembersFighterList = new ArrayList<Fighter>();
+			
+			
+			fighersInt = daoM.listAllFightersofOneMember(memberId);
+			for (int fId : fighersInt) {
+				OneMembersFighterList.add(daoF.getFighter(fId));
+
+			}
+
+			tx.commit();
+			enMg.close();
+			session.setAttribute("memberId",memberId);
+			session.setAttribute("OneMembersFighterList", OneMembersFighterList);
+			nextPage = "/admin/OneMembersFighterList.jsp";
+
+		}
+
+
+		// show fighter in one city
+
+		if (submitType.equals("FightersInOneCity")) {
+			String city = request.getParameter("city");
+
+			List<Integer> AllfighersInOneCity = new ArrayList<Integer>();
+			List<Fighter> AllfighersObjectInOneCity = new ArrayList<Fighter>();
+
+			// if option = cat
+			AllfighersInOneCity = daoM.FightersInOneCity(city);
+			for (int fId : AllfighersInOneCity) {
+				AllfighersObjectInOneCity.add(daoF.getFighter(fId));
+
+			}
+
+
+			tx.commit();
+			enMg.close();
+			session.setAttribute("AllfighersObjectInOneCity",
+					AllfighersObjectInOneCity);
+			nextPage = "/admin/fightersInOneCity.jsp";
+			                  
+		}
+
+		// log out
+		if (submitType.equals("LogOut")) {
+
+			session.invalidate();
+			nextPage = "../index.jsp";
+
+		}
+
+		RequestDispatcher dispatcher = request.getRequestDispatcher(nextPage);
+		dispatcher.forward(request, response);
+
+	}
+}

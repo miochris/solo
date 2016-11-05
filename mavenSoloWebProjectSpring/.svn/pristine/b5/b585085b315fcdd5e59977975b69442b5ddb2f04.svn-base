@@ -1,0 +1,255 @@
+package com.fdmgroup.market.controller;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Persistence;
+import javax.persistence.Query;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.dao.AddressDAO;
+import com.fdmgroup.market.dao.FighterDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Cat;
+import com.fdmgroup.market.entity.Dog;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.enums.City;
+
+public class Controller {
+	public static final Logger LOG = Logger.getLogger(Controller.class);
+
+	// private EntityManager enMg;
+	public Controller(EntityManager enMg) {
+
+		this.enMg = enMg;
+	}
+
+	public Controller() {
+
+	}
+
+	EntityManagerFactory enMgFac = Persistence
+			.createEntityManagerFactory("JPADemoPersistence");
+	EntityManager enMg = enMgFac.createEntityManager();
+	FighterDAO daoF = new FighterDAO(enMg);
+	MemberDAO daoM = new MemberDAO(enMg);
+	AddressDAO daoA = new AddressDAO(enMg);
+	EntityTransaction tx = enMg.getTransaction();
+
+	// public Fighter findFighter(int fId) {
+	// tx.begin();
+	// Fighter fighter = daoF.getFighter(fId);
+	//
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	// LOG.info("fighter found " + fighter.toString());
+	// return fighter;
+	// }
+
+	// public void addMember(Member member) {
+	// // tx.begin();
+	// // Member member = new Member(name, balance);
+	// System.out.println("**************************1");
+	// System.out.println(member);
+	// System.out.println(enMg);
+	// daoM.addNewMember(member);
+	// // tx.commit();
+	// // enMg.close();
+	// // enMgFac.close();
+	// System.out.println("**************************2");
+	// LOG.info(member.toString() + " added");
+	// }
+
+	 public void addCat(Cat cat) {
+	 //String name, int nOfW, int nOfL, int speed, double price
+	 tx.begin();
+	 // Cat cat = new Cat(name, nOfW, nOfL, speed, price);
+	 daoF.addCat(cat);
+	 tx.commit();
+	 enMg.close();
+	 enMgFac.close();
+	 LOG.info(cat.toString() + " added");
+	 }
+	//
+	 public void addDog(Dog dog) {
+	 //String name, int nOfW, int nOfL, int speed, double price
+	 tx.begin();
+	 // Dog dog = new Dog(name, nOfW, nOfL, speed, price);
+	 daoF.addDog(dog);
+	 tx.commit();
+	 enMg.close();
+	 enMgFac.close();
+	 LOG.info(dog.toString() + " added");
+	 }
+	//
+	//
+	// public void setBalance(int mId, int newBalance){
+	// tx.begin();
+	// Member member=daoM.getMemberById(mId);
+	// daoM.setBalance(member, newBalance);
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	//
+	// }
+	// public void addBalance(int mId, int deposit){
+	// tx.begin();
+	// Member member=daoM.getMemberById(mId);
+	// daoM.setBalance(member, daoM.getMemberById(mId).getBalance()+deposit);
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	//
+	// }
+	//
+	//
+	//
+	//
+	// //
+	// // public static List<Item> listAllItem() {
+	// //
+	// // EntityManagerFactory factory = Persistence
+	// // .createEntityManagerFactory("JPADemoPersistence");
+	// // ItemDAO daoI = new ItemDAO(factory);
+	// // List<Item> allItems = new ArrayList<Item>();
+	// // factory.close();
+	// // return allItems = daoI.getAllItems();
+	// // }
+	// //
+	// // public static List<Item> listAllAvailableItem() {
+	// //
+	// // EntityManagerFactory factory = Persistence
+	// // .createEntityManagerFactory("JPADemoPersistence");
+	// // ItemDAO daoI = new ItemDAO(factory);
+	// // List<Item> allAvailableItems = daoI.getAllAvailableItems();
+	// // factory.close();
+	// // return allAvailableItems;
+	// //
+	// // }
+	// //
+	 public void sendFighterToMember(int fId, int mId) {
+	 tx.begin();
+	 // Fighter fighter = daoF.getFighter(fId);
+	 // Member member = daoM.getMemberById(mId);
+	 //
+	 // daoM.addFighterToNewMember(fighter, member);
+	
+	
+	 daoM.addFighterToNewMember(daoF.getFighter(fId),
+	 daoM.getMemberById(mId));
+	
+	 tx.commit();
+	 enMg.close();
+	 enMgFac.close();
+	
+	 }
+	//
+	// //
+	// public Member findMember(int mId) {
+	// tx.begin();
+	// Member member = daoM.getMemberById(mId);
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	// LOG.info(member.toString());
+	// return member;
+	// }
+	//
+	//
+	// public void setMemberDoB(String yyyyMMdd,int mId) throws ParseException{
+	// tx.begin();
+	// Member member = daoM.getMemberById(mId);
+	// Date date=parseDate( yyyyMMdd);
+	// daoM.setDoB(date, member);
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	// }
+	//
+	// private Date parseDate(String yyyyMMdd) throws ParseException {
+	// SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+	// java.util.Date parsed = format.parse(yyyyMMdd);
+	// java.sql.Date sql = new java.sql.Date(parsed.getTime());
+	// return sql;
+	// }
+	//
+	// public void fight(int f1Id, int f2Id) {
+	// tx.begin();
+	// boolean
+	// result=calculateFightResult(daoF.getFighter(f1Id),daoF.getFighter(f2Id));
+	// daoM.changeBalanceAfterFight(daoF.getFighter(f1Id).getMember(),daoF.getFighter(f2Id).getMember(),result);
+	// daoF.changeFighterRecord(daoF.getFighter(f1Id),daoF.getFighter(f2Id),result);
+	// daoF.changeFighterPrice(daoF.getFighter(f1Id),daoF.getFighter(f2Id),result);
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	// }
+	// // TODO
+	// private boolean calculateFightResult(Fighter fighter, Fighter fighter2) {
+	//
+	// return true;
+	// }
+	//
+	// public List<Fighter> listMemberFighter(int mId) {
+	// tx.begin();
+	// List<Fighter> fighterList=daoM.getMemberById(mId).getFighterList();
+	//
+	//
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	// return fighterList;
+	//
+	//
+	// }
+	//
+	// public List<Fighter> listFightersOfCity(String city) {
+	// tx.begin();
+	// City city2=City.findCity(city);
+	// List<Fighter> fightersInSameCity=null;
+	//
+	//
+	//
+	//
+	// tx.commit();
+	// enMg.close();
+	// enMgFac.close();
+	//
+	// return fightersInSameCity;
+	//
+	// }
+	public void addMemberWithAddress(String name, double balance, String street, String postcode, City city) {
+		tx.begin();
+		Member member= new Member(name, balance);
+		Address address = new Address(street, postcode, city);
+		daoM.addNewMember(member);
+		daoA.addAddressToMember(address, member);
+		tx.commit();
+		enMg.close();
+		enMgFac.close();
+
+	}
+
+	public void listMembersInOneCity(String city) {
+//		City cityToFind=City.findCity(city);
+//		City cityToFind2=City.valueOf(city);
+		
+//		Query query = em.createNativeQuery(  "select id from users where username = ?");  
+//		   query.setParameter(1, "lt");  
+//		   BigDecimal val = (BigDecimal) query.getSingleResult(); 
+		
+		daoM.listMembersInOneCity( city);
+		
+		
+	}
+	
+	public void listFightersInOneCity(String city) {
+		daoM.FightersInOneCity(city);
+		
+		
+	}
+
+}

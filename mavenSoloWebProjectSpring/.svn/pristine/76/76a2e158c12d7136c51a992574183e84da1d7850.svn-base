@@ -1,0 +1,196 @@
+package com.fdmgroup.market.dao;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.enums.City;
+
+public class MemberDAO {
+	public static final Logger LOG = Logger.getLogger(MemberDAO.class);
+
+	private EntityManagerFactory enMgFac;
+
+	public MemberDAO() {
+	}
+
+	public MemberDAO(EntityManagerFactory enMgFac) {
+		super();
+		this.enMgFac = enMgFac;
+	}
+
+	public void addNewMember(Member member) {
+
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		enMg.persist(member);
+		enMg.getTransaction().commit();
+		enMg.close();
+
+		LOG.info("New member added: " + member);
+	}
+
+	public Member getMemberById(int mId) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		Member member = enMg.find(Member.class, mId);
+		enMg.close();
+		return member;
+	}
+
+	public void addFighterToNewMember(Fighter fighter, Member member) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		member.addFighter(fighter);
+		enMg.merge(member);
+		enMg.getTransaction().commit();
+		enMg.close();
+
+	}
+
+	public List<Fighter> showListOfFighters(int mId) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		Member member = enMg.find(Member.class, mId);
+		List<Fighter> fighters = member.getFighterList();
+		enMg.close();
+		LOG.info("fighter numbers " + fighters.size());
+		return fighters;
+
+	}
+
+	public void changeBalanceAfterFight(Member member1, Member member2,
+			boolean result) {
+
+		if (result == true) {
+			changeMemberBalance(member1, 2000);
+			changeMemberBalance(member2, -2000);
+		} else {
+			changeMemberBalance(member1, 2000);
+			changeMemberBalance(member2, -2000);
+		}
+
+	}
+
+	public void changeMemberBalance(Member member, double gain) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		double balanceBeforeFight = member.getBalance();
+		double balanceAfterFight = balanceBeforeFight + gain;
+		LOG.info(member +" 's new balance is ***********: 0" +member.getBalance());
+		LOG.info(member +" balanceAfterFight should be ***********: " +balanceAfterFight);
+		member.setBalance(balanceAfterFight);
+		enMg.merge(member);
+		enMg.getTransaction().commit();
+		enMg.close();
+LOG.info(member +" 's new balance is ***********1: " +member.getBalance());
+	}
+
+	public void listMembersInOneCity(String city) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		// City cityToFind=City.findCity(city);
+		Query query = enMg
+				.createNativeQuery("select member_id from address where city = ?");
+		query.setParameter(1, city);
+		List<BigDecimal> membersInOneCity = (List<BigDecimal>) query
+				.getResultList();
+		for (BigDecimal mId : membersInOneCity) {
+			LOG.info(mId);
+		}
+		enMg.close();
+	}
+
+	public List<Fighter> FightersInOneCity(String city) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		City c = City.valueOf(city);
+		
+		TypedQuery<Fighter> query= enMg.createQuery("select f from Fighter f where f.member.address.city=:city", Fighter.class);
+		query.setParameter("city", c);
+		List<Fighter> fightersInOneCity =query.getResultList();
+		
+		enMg.close();
+		return fightersInOneCity;
+
+	}
+
+	public List<Fighter> FightersInYourCity(City city, int yourId) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		TypedQuery<Fighter> query= enMg.createQuery("select f from Fighter f where f.member.address.city=:city and f.member <> :member", Fighter.class);
+		query.setParameter("city", city);
+		query.setParameter("member", getMemberById(yourId));
+		List<Fighter> fighersInYourCity =query.getResultList();
+		enMg.close();
+		return fighersInYourCity;
+
+	}
+
+	public List<Member> showAllMembers() {
+		EntityManager enMg = enMgFac.createEntityManager();
+		TypedQuery<Member> query = (TypedQuery<Member>) enMg.createQuery("select m from Member m",Member.class);
+		List<Member> memberList=query.getResultList();
+		enMg.close();
+		return memberList;
+	}
+
+	public List<Fighter> listAllFighters() {
+		EntityManager enMg = enMgFac.createEntityManager();
+		TypedQuery<Fighter> query = (TypedQuery<Fighter>) enMg.createQuery("select  f from Fighter f ", Fighter.class);
+		List<Fighter> fighterList =query.getResultList();
+		enMg.close();
+		return fighterList;
+	}
+
+	public List<Fighter> listAllFightersofOneMember(String memberId) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		Member member =getMemberById(Integer.parseInt(memberId) );
+		TypedQuery<Fighter> query =enMg.createQuery(" select f from Fighter f where f.member = :member", Fighter.class);
+		query.setParameter("member", member);
+		
+		List<Fighter> fighterList=query.getResultList();
+		
+		enMg.close();
+		return fighterList;
+	}
+
+	public void addAddressToMember(Address address, Member member) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		enMg.getTransaction().begin();
+		member.setAddress(address);
+		enMg.merge(member);
+		enMg.getTransaction().commit();
+		enMg.close();
+	}
+
+	public Member getMemberByName(String userName) {
+		EntityManager enMg = enMgFac.createEntityManager();
+		TypedQuery<Member> query =enMg.createQuery(" select m from Member  m where m.name= :name", Member.class);
+		query.setParameter("name", userName);
+		
+		
+		Member member=query.getSingleResult();
+		
+		return member;
+	}
+
+	public void buyFighter(Fighter fighterToBuy, Member member) {
+	LOG.info("fighter's price is **********  "+fighterToBuy.getPrice());	
+		LOG.info("buyer*******************************"  +  member);
+		LOG.info("seller*****************************" +fighterToBuy.getMember());
+		changeMemberBalance(member,-fighterToBuy.getPrice());
+		changeMemberBalance(fighterToBuy.getMember(),fighterToBuy.getPrice());
+		addFighterToNewMember(fighterToBuy,member);
+		
+	}
+
+
+
+
+}

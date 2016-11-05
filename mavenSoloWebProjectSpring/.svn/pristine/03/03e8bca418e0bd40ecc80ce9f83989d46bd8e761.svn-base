@@ -1,0 +1,21 @@
+package com.fdmgroup.market.model;
+
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+
+public class EMFSingleton {
+
+	private static EntityManagerFactory enMgfac;
+	
+	private EMFSingleton(){}
+	
+	
+	public static EntityManagerFactory getEMF(){
+		if (enMgfac == null){
+			enMgfac = Persistence.createEntityManagerFactory("JPADemoPersistence");
+		}
+		return enMgfac;
+	}
+	
+	
+}

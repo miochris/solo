@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+<a href="admin/AddNewFighter.jsp">add new fighter</a><br> 
+<a href="admin/MemberList.jsp">show all Members</a>	<br> 
+<a href="admin/fightersInMembersOwnCity.jsp">show fighters in your city</a>	<br> 
+	<form action="MemberRegisterServlet" method="post">
+
+		show  fighter in same city <input name="city" /> <br> 
+		
+		<input type="Submit" name = "Submit" value="FightersInSameCity" />
+	</form>
+</body>
+</html>

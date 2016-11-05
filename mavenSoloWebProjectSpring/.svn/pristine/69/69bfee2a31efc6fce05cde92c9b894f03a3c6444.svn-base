@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Insert title here</title>
+</head>
+<body>
+	 
+<a href="/WEB-INF/views/member/MemberHome.html">member</a>
+<a href="/WEB-INF/views/admin/AdminHome.html">admin</a>	
+<!-- 
+ <a href="Login/Login">member</a>
+ /mavenSoloWebProject/admin/AdminLogin
+ -->
+</body>
+</html>

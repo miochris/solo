@@ -1,0 +1,29 @@
+package com.fdmgroup.market.dao;
+
+import javax.persistence.EntityManager;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.entity.UsersForLogin;
+
+public class LoginDAO {
+	public static final Logger LOG = Logger.getLogger(LoginDAO.class);
+
+	private EntityManager enMg;
+
+	public LoginDAO() {
+	}
+
+	public LoginDAO(EntityManager enMg) {
+		this.enMg = enMg;
+	}
+	public void addNewUser(UsersForLogin u) {
+		
+		enMg.persist(u);
+		LOG.info("added new member "+ u);
+	}
+	
+
+	
+}

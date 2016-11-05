@@ -1,0 +1,93 @@
+package com.fdmgroup.market.dao;
+
+import java.sql.Date;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+
+public class MemberDAO {
+	public static final Logger LOG = Logger.getLogger(MemberDAO.class);
+	
+	private EntityManager enMg;
+
+	public MemberDAO() {
+	}
+
+	public MemberDAO(EntityManager enMg) {
+		super();
+		this.enMg = enMg;
+	}
+
+	public void addNewMember(Member member) {
+		
+		enMg.persist(member);
+		LOG.info("added new member "+ member);
+	}
+
+	public Member getMemberById(int mId) {
+		Member member = enMg.find(Member.class, mId);
+		return member;
+	}
+
+	public void addFighterToNewMember(Fighter fighter, Member member) {
+		Member newMember= member;
+		
+		Member merged= enMg.merge(newMember);
+		
+		newMember.addFighter(fighter);
+		
+		
+		LOG.info("newmember list size after "+newMember.getFighterList().size());
+		LOG.info("member list size after "+member.getFighterList().size());
+
+	}
+	
+	public List showListOfFighters(int mId){
+		Member member = enMg.find(Member.class, mId);
+		 List fighters=member.getFighterList();
+		 LOG.info("fighter numbers "+fighters.size());
+		return fighters;
+		
+	}
+	
+	public void setDoB(Date dob, Member member){
+		Member newMember= member;
+		Member merged= enMg.merge(newMember);
+		newMember.setDateOfBirth(dob);
+		LOG.info(member);
+	}
+
+	public void changeBalanceAfterFight(Member member1, Member member2,
+			boolean result) {
+		
+		if (result==true){
+			changeMemberBalance(member1,2000);
+			changeMemberBalance(member2,-2000);
+		}
+		else{
+			changeMemberBalance(member1,2000);
+			changeMemberBalance(member2,-2000);
+		}
+	}
+	private void changeMemberBalance(Member member, double gain) {
+		double balanceBeforeFight=member.getBalance();
+		double balanceAfterFight=balanceBeforeFight+gain;
+		setBalance(member,balanceAfterFight);
+		
+	}
+
+	public void setBalance(Member member,double balance){
+		Member newMember= member;
+		Member merged= enMg.merge(newMember);
+		newMember.setBalance(balance);
+		LOG.info(member.getId()+"'s new balance is: " + balance);
+		
+	}
+
+
+}

@@ -1,0 +1,125 @@
+package com.fdmgroup.market.dao;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.TypedQuery;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.entity.Cat;
+import com.fdmgroup.market.entity.Dog;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+
+public class FighterDAO {
+	public static final Logger LOG = Logger.getLogger(FighterDAO.class);
+	private EntityManager enMg;
+
+	public FighterDAO(EntityManager enMg) {
+		super();
+		this.enMg = enMg;
+	}
+
+	public void addCat(Cat cat) {
+		enMg.persist(cat);
+		LOG.info(cat);
+
+	}
+
+	public void addDog(Dog dog) {
+		enMg.persist(dog);
+		LOG.info(dog);
+
+	}
+
+	public void deleteFighter(int fId) {
+
+		Fighter fighter = getFighter(fId);
+		if (fighter != null) {
+			enMg.remove(fighter);
+			LOG.info("fighter removed");
+		}
+
+	}
+
+	public Fighter getFighter(int id) {
+		Fighter fighter = null;
+		Fighter cat = enMg.find(Cat.class, id);
+		Fighter dog = enMg.find(Dog.class, id);
+		if (cat != null) {
+			fighter = cat;
+
+		} else if (dog != null) {
+			fighter = dog;
+		}
+
+		return fighter;
+
+	}
+
+	public void updateFighterPrice(int fId, double price) {
+
+		Fighter fighter = getFighter(fId);
+		fighter.setPrice(price);
+		LOG.info("fighter " + fId + " 's new price is: " + price);
+	}
+
+	public List<Fighter> getAllItems() {
+		List<Fighter> allItems = null;
+		TypedQuery<Fighter> query = enMg.createQuery("select i from Item i",
+				Fighter.class);
+		allItems = query.getResultList();
+		for (Fighter i : allItems) {
+			System.out.println(i);
+		}
+		return allItems;
+	}
+
+	public void changeFighterRecord(Fighter fighter1, Fighter fighter2,
+			boolean result) {
+		if (result == true) {
+			changeRecord(fighter1, 1);
+			changeRecord(fighter2, -1);
+		} else {
+			changeRecord(fighter1, -1);
+			changeRecord(fighter2, 1);
+		}
+
+	}
+
+	private void changeRecord(Fighter fighter, int i) {
+		if (i > 0) {
+			setNumOfWin(fighter, fighter.getnOfW() + 1);
+		} else if (i < 0) {
+			setNumOfLost(fighter, fighter.getnOfL() + 1);
+		}
+	}
+
+	private void setNumOfWin(Fighter fighter, int record) {
+		Fighter newFighter = fighter;
+		Fighter merged = enMg.merge(newFighter);
+		newFighter.setnOfW(record);
+	}
+
+	private void setNumOfLost(Fighter fighter, int record) {
+		Fighter newFighter = fighter;
+		Fighter merged = enMg.merge(newFighter);
+		newFighter.setnOfL(record);
+	}
+
+	public void changeFighterPrice(Fighter fighter1, Fighter fighter2,
+			boolean result) {
+		if (result == true) {
+			updateFighterPrice(fighter1.getId(), fighter1.getPrice() * 1.1);
+			updateFighterPrice(fighter2.getId(), fighter2.getPrice() * 0.9);
+
+		} else if (result == false) {
+			updateFighterPrice(fighter1.getId(), fighter1.getPrice() * 0.9);
+			updateFighterPrice(fighter2.getId(), fighter2.getPrice() * 1.1);
+		}
+
+	}
+
+}

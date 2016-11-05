@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+          xmlns:mvc="http://www.springframework.org/schema/mvc"
+          xmlns:context="http://www.springframework.org/schema/context"
+                     xmlns:tx="http://www.springframework.org/schema/tx"
+          xsi:schemaLocation="http://www.springframework.org/schema/mvc
+              http://www.springframework.org/schema/mvc/spring-mvc.xsd
+              http://www.springframework.org/schema/beans
+              http://www.springframework.org/schema/beans/spring-beans.xsd
+              http://www.springframework.org/schema/context
+              http://www.springframework.org/schema/context/spring-context.xsd
+                                                http://www.springframework.org/schema/mvc
+                                                http://www.springframework.org/schema/mvc/spring-mvc.xsd
+              http://www.springframework.org/schema/tx
+                                               http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+
+ <context:annotation-config/>
+       <context:component-scan base-package="com.fdmgroup.market.controllers"/>
+       <context:component-scan base-package="com.fdmgroup.market.dao"/>
+       <context:component-scan base-package="com.fdmgroup.market.entity"/>
+       <context:component-scan base-package="com.fdmgroup.market.enums"/>
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.JstlView" />
+		<property name="prefix" value="/WEB-INF/views/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+<!--  
+	<bean id="emf" class="javax.persistence.Persistence" scope="singleton"
+		factory-method="createEntityManagerFactory">
+		<constructor-arg value="BankDatabase" />
+	</bean>
+-->
+
+
+	<!-- This produces a container-managed EntityManagerFactory; rather than 
+		application-managed EntityManagerFactory as in case of LocalEntityManagerFactoryBean -->
+	<bean id="enMgFac"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="persistenceUnitName" value="JPADemoPersistence" />
+		<property name="jpaVendorAdapter">
+			<bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" />
+		</property>
+	</bean>
+
+
+
+<!-- Transactions -->
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="enMgFac" />
+	</bean>
+<!-- enable the configuration of transactional behavior based on annotations -->
+	<tx:annotation-driven />
+<bean id="daoM" class="com.fdmgroup.market.dao.MemberDAO">      </bean>
+<bean id="daoA" class="com.fdmgroup.market.dao.AddressDAO"> </bean>
+<bean id="daoF" class="com.fdmgroup.market.dao.FighterDAO">       </bean>
+	<!-- transaction-manager="transactionManager" -->
+</beans>
+

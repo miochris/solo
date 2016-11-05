@@ -1,0 +1,25 @@
+# Root logger option
+#log4j.rootLogger=info, stdout
+log4j.rootLogger=debug, stdout, file
+#log4j.logger.SchemaUpdate = FATAL
+#log4j.logger.connections = FATAL
+#log4j.logger.Version = FATAL
+#log4j.logger.Dialect = FATAL
+
+# Direct log messages to stdout
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.Target=System.out
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n%n
+
+
+# Redirect log messages to a log file, support file rolling.
+log4j.appender.file=org.apache.log4j.RollingFileAppender
+#log4j.appender.file.File=C:\\Users\\qiang.liu\\JavaEclipseWorkspace\\market\\src\\main\\resources\\logFile.log
+log4j.appender.file.File=C:\\app\\Javalog\\logFile.log
+#log4j.appender.file.File=/Users/Ludovic/Desktop/JavaLog/logFile.log
+#log4j.appender.file.File=H:\\logFile.log
+log4j.appender.file.MaxFileSize=5MB
+log4j.appender.file.MaxBackupIndex=10
+log4j.appender.file.layout=org.apache.log4j.PatternLayout
+log4j.appender.file.layout.ConversionPattern=%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n

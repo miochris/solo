@@ -1,0 +1,133 @@
+package com.fdmgroup.market.servlet;
+
+import java.io.IOException;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.fdmgroup.market.controller.Controller;
+import com.fdmgroup.market.dao.FighterDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Cat;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+
+/**
+ * Servlet implementation class MemberRegisterServlet
+ */
+public class MemberRegisterServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+
+		EntityManagerFactory enMgFac = (EntityManagerFactory) getServletContext()
+				.getAttribute("enMgFac");
+		EntityManager enMg = enMgFac.createEntityManager();
+		EntityTransaction tx = enMg.getTransaction();
+		Controller controller = new Controller(enMg);
+		
+		HttpSession session=request.getSession();
+		
+		MemberDAO daoM = new MemberDAO(enMg);
+		FighterDAO daoF=new  FighterDAO(enMg);
+		String nextPage=null;
+		tx.begin();
+// add member
+		String submitType=request.getParameter("Submit");
+		
+		
+		if(submitType.equals("Register")){
+			String name = request.getParameter("name");
+			String balance = request.getParameter("balance");
+//			String name = (String) session.getAttribute("name");
+//			String balance = (String) session.getAttribute("balance");
+			Member member = new Member(name, Double.parseDouble(balance));
+			// controller.addMember(member);
+			daoM.addNewMember(member);
+			// enMg.persist(member);
+			tx.commit();
+			enMg.close();
+			request.setAttribute("registededMember", member);
+//			session.setAttribute("registededMember", member);
+			RequestDispatcher dispatcher = request
+					.getRequestDispatcher("index.jsp");
+			dispatcher.forward(request, response);
+			
+		}
+		
+//		String name = request.getParameter("name");
+//		String balance = request.getParameter("balance");
+////		String name = (String) session.getAttribute("name");
+////		String balance = (String) session.getAttribute("balance");
+//		Member member = new Member(name, Double.parseDouble(balance));
+//		// controller.addMember(member);
+//		daoM.addNewMember(member);
+//		// enMg.persist(member);
+
+		
+		// find member and list fighters
+		if(submitType.equals("FighterList")){
+		String mfId = request.getParameter("memberId");
+		System.out.println(mfId+"   *****************************");
+		System.out.println("*****************************member id :"+ Integer.parseInt(mfId));
+		Member memberFound =daoM.getMemberById(Integer.parseInt(mfId));
+		
+		List<Fighter> fighterList=memberFound.getFighterList();
+		
+		tx.commit();
+		enMg.close();
+		request.setAttribute("fighterList", fighterList);
+		RequestDispatcher dispatcher = request
+				.getRequestDispatcher("/member/FighterList.jsp");
+		dispatcher.forward(request, response);
+		}
+		
+		// add fighter
+		
+		if(submitType.equals("AddFighter")){
+		String name = request.getParameter("name");
+		int nOfW = Integer.parseInt(request.getParameter("nOfW"))  ;
+		int nOfL = Integer.parseInt(request.getParameter("nOfL"));
+		int speed = Integer.parseInt(request.getParameter("speed"));
+		Double price = Double.parseDouble(request.getParameter("price"));
+		
+		
+		// if option = cat   
+		Cat newAddedFighter= new Cat(name,nOfW,nOfL,speed,price);
+		daoF.addCat(newAddedFighter);
+	
+		
+		
+		tx.commit();
+		enMg.close();
+		request.setAttribute("newAddedFighter", newAddedFighter);
+		nextPage="/member/test.html";
+		}
+		
+		
+		RequestDispatcher dispatcher = request
+				.getRequestDispatcher(nextPage);
+		dispatcher.forward(request, response);
+		
+		
+//		tx.commit();
+//		enMg.close();
+
+		// setting user into request scope
+//		request.setAttribute("registededMember", member);
+////		session.setAttribute("registededMember", member);
+//		RequestDispatcher dispatcher = request
+//				.getRequestDispatcher("index.jsp");
+//		dispatcher.forward(request, response);
+
+	}
+}

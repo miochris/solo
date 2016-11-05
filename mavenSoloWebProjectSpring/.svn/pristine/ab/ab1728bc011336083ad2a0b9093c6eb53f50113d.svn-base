@@ -1,0 +1,71 @@
+package com.fdmgroup.market.controllers;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.propertyeditors.CustomDateEditor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+import com.fdmgroup.market.dao.AddressDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.model.EMFSingleton;
+
+@Controller
+public class AdminController {
+	private static final long serialVersionUID = 1L;
+	public static final Logger LOG = Logger.getLogger(AdminController.class);
+
+	
+	
+//	private User getUser(String userId){
+//		UserDAO userDAO = new UserDAO(EMFSingleton.getEMF());
+//		return userDAO.findUser(userId);
+//	}
+	
+	
+	@RequestMapping(value = "/adminAddMember", method = RequestMethod.GET)
+	public String goTORegistration(Model model, Member member, Address address) {
+		
+		System.out.println("1 ********   "+member);
+		
+		 address = new Address();
+		 member = new Member();
+		
+		
+		model.addAttribute("member", new Member());
+		model.addAttribute("address", new Address());
+		
+		
+		
+		System.out.println("2 ********   "+member);
+		return "admin/AddNewMember";
+		
+	}
+	
+	
+	@RequestMapping(value = "/adminAddMember", method = RequestMethod.POST)
+	public String register(Model model, Member member, Address address){
+			System.out.println(member);
+			MemberDAO daoM = new MemberDAO(EMFSingleton.getEMF());
+			AddressDAO daoA = new AddressDAO(EMFSingleton.getEMF());
+			daoM.addNewMember(member);
+			daoA.addAddressToMember(address, member);
+			
+		return "admin/memberAdded";
+	}
+	
+//	@InitBinder
+//	protected void initBinder(WebDataBinder binder) {
+//	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+//	    binder.registerCustomEditor(Date.class, new CustomDateEditor(
+//	            dateFormat, false));
+//	}
+}

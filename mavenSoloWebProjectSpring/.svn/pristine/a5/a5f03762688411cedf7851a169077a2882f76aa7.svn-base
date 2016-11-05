@@ -1,0 +1,165 @@
+package com.fdmgroup.market.controllers;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.fdmgroup.market.dao.AddressDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+
+@Controller
+public class AdminController {
+	public static final Logger LOG = Logger.getLogger(AdminController.class);
+	@Autowired
+	MemberDAO daoM;
+	@Autowired
+	AddressDAO daoA;
+
+	@RequestMapping(value = "/home", method = RequestMethod.GET)
+	public String goToIndex() {
+
+		return "index";
+
+	}
+
+	@RequestMapping(value = "/admin/AdminHome", method = RequestMethod.GET)
+	public String goToAdminHome() {
+		LOG.info("back to admin");
+
+		return "admin/AdminHome";
+
+	}
+
+	@RequestMapping(value = "/admin/adminLogin", method = RequestMethod.GET)
+	public String grepLoginName(HttpServletRequest request) {
+		String userName = request.getUserPrincipal().getName();
+		request.getSession().setAttribute("userName", userName);
+		LOG.info(userName);
+		return "admin/AdminHome";
+	}
+
+	@RequestMapping(value = "/admin/adminAddMember", method = RequestMethod.GET)
+	public String goTORegistration(Model model, Member member, Address address) {
+
+		System.out.println("1 ********   " + member);
+
+		address = new Address();
+		member = new Member();
+		member.setAddress(address);
+
+		model.addAttribute("member", new Member());
+		model.addAttribute("address", new Address());
+
+		System.out.println("2 ********   " + member);
+		return "admin/AddNewMember";
+
+	}
+
+	@RequestMapping(value = "/admin/adminAddMember", method = RequestMethod.POST)
+	public String adminAddMember(Model model, Member member
+	) {
+		daoM.addNewMember(member);
+		System.out.println(member);
+		return "admin/memberAdded";
+	}
+
+	// show member list
+
+	@RequestMapping(value = "/admin/AllMemberList", method = RequestMethod.GET)
+	public String showAllMemmbers(HttpServletRequest request) {
+		// AddressDAO daoA = new AddressDAO(EMFSingleton.getEMF());
+		// FighterDAO daoF = new FighterDAO(EMFSingleton.getEMF());
+		List<Member> memberList = daoM.showAllMembers();
+		request.getSession().setAttribute("memberList", memberList);
+
+		return "admin/memberList";
+	}
+
+	// show fighter list
+	@RequestMapping(value = "/admin/AllFighterList", method = RequestMethod.GET)
+	public String showAllFighters(HttpServletRequest request) {
+		List<Fighter> AllFighterList = daoM.listAllFighters();
+		request.getSession().setAttribute("fighterList", AllFighterList);
+
+		return "admin/FighterList";
+	}
+
+	// show fighter in one city
+
+	@RequestMapping(value = "/admin/FightersInLondon", method = RequestMethod.GET)
+	public String showAllFightersInLondon(HttpServletRequest request) {
+		List<Fighter> AllfighersInOneCity = daoM.FightersInOneCity("London");
+		request.getSession().setAttribute("AllfighersInOneCity",
+				AllfighersInOneCity);
+		return "admin/fightersInOneCity";
+	}
+
+	@RequestMapping(value = "/admin/FightersInNY", method = RequestMethod.GET)
+	public String showAllFightersInNY(HttpServletRequest request) {
+		// request.getSession().invalidate();
+		List<Fighter> AllfighersInOneCity = daoM.FightersInOneCity("NY");
+		request.getSession().setAttribute("AllfighersInOneCity",
+				AllfighersInOneCity);
+		return "admin/fightersInOneCity";
+	}
+
+	@RequestMapping(value = "/admin/FightersInTOKYO", method = RequestMethod.GET)
+	public String showAllFightersInTOKYO(HttpServletRequest request) {
+		List<Fighter> AllfighersInOneCity = daoM.FightersInOneCity("TOKYO");
+		request.getSession().setAttribute("AllfighersInOneCity",
+				AllfighersInOneCity);
+		return "admin/fightersInOneCity";
+	}
+
+	// show one member's fighters
+	@RequestMapping(value = "/admin/OneMemberFighter", method = RequestMethod.GET)
+	public String chooseMemberId(HttpServletRequest request, Model model,
+			Member member) {
+
+		List<Integer> memberListNum = daoM.showAllMembersID();
+		request.getSession().setAttribute("memberListNum", memberListNum);
+		return "admin/memberId";
+	}
+
+	@RequestMapping(value = "/admin/OneMemberFighter", method = RequestMethod.POST)
+	public String showOneMembersFighters(HttpServletRequest request,
+			Model model, Member member, @RequestParam String id) {
+
+		member = daoM.getMemberById(Integer.parseInt(id));
+		List<Fighter> OneMembersFighterList = daoM
+				.listAllFightersofOneMember(id);
+		request.getSession().setAttribute("OneMembersFighterList",
+				OneMembersFighterList);
+		request.getSession().setAttribute("member", member);
+		return "admin/OneMembersFighterList";
+	}
+
+	// log out
+
+	@RequestMapping(value = "/admin/Logout", method = RequestMethod.GET)
+	public String logout(HttpServletRequest request) {
+		request.getSession().invalidate();
+		return "index";
+	}
+
+	// @InitBinder
+	// protected void initBinder(WebDataBinder binder) {
+	// SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+	// binder.registerCustomEditor(Date.class, new CustomDateEditor(
+	// dateFormat, false));
+	// }
+}

@@ -1,0 +1,146 @@
+package com.fdmgroup.market.servlet;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.controllers.DAOController;
+import com.fdmgroup.market.dao.AddressDAO;
+import com.fdmgroup.market.dao.FighterDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Address;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+import com.fdmgroup.market.enums.City;
+import com.fdmgroup.market.enums.Role;
+
+/**
+ * Servlet implementation class AdminServlet
+ */
+public class AdminServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	public static final Logger LOG = Logger.getLogger(AdminServlet.class);
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+
+		EntityManagerFactory enMgFac = (EntityManagerFactory) getServletContext()
+				.getAttribute("enMgFac");
+
+		HttpSession session = request.getSession();
+
+		MemberDAO daoM = new MemberDAO(enMgFac);
+		FighterDAO daoF = new FighterDAO(enMgFac);
+		AddressDAO daoA = new AddressDAO(enMgFac);
+		String nextPage = null;
+
+		String submitType = request.getParameter("Submit");
+
+		// add member or admin
+
+		if (submitType.equals("Register")) {
+			String name = request.getParameter("name");
+			String balance = request.getParameter("balance");
+			String street = request.getParameter("street");
+			String postcode = request.getParameter("postcode");
+			String city = request.getParameter("city");
+			String password = request.getParameter("password");
+			String dob = request.getParameter("dob");
+			String role = request.getParameter("role");
+
+			Member member = new Member(name, Double.parseDouble(balance),
+					password);
+			Address address = new Address(street, postcode, City.valueOf(city));
+//			Date date = parseDate(dob);
+			member.setDateOfBirth(dob);
+			member.setRole(Role.valueOf(role));
+			member.setPassword(password);
+			daoM.addNewMember(member);
+			daoA.addAddressToMember(address, member);
+			// session.setAttribute("registededMember", member);
+			nextPage = "/admin/AdminHome.html";
+
+		}
+
+
+
+		// show all members
+
+		if (submitType.equals("AllMemberList")) {
+			List<Member> memberList = daoM.showAllMembers();
+			session.setAttribute("AllmemberList", memberList);
+			nextPage = "/admin/memberList.jsp";
+
+		}
+
+		// show all fighters
+		if (submitType.equals("AllFighterList")) {
+			List<Fighter> AllFighterList = daoM.listAllFighters();
+			session.setAttribute("AllFighterList", AllFighterList);
+			nextPage = "/admin/FighterList.jsp";
+
+		}
+
+		// show one member's fighter list
+		if (submitType.equals("OneMembersFighterList")) {
+			String memberId = request.getParameter("member");
+			List<Fighter> OneMembersFighterList = new ArrayList<Fighter>();
+			OneMembersFighterList = daoM.listAllFightersofOneMember(memberId);
+			session.setAttribute("memberId", memberId);
+			session.setAttribute("OneMembersFighterList", OneMembersFighterList);
+			nextPage = "/admin/OneMembersFighterList.jsp";
+		}
+
+		// show fighter in one city
+
+		if (submitType.equals("FightersInOneCity")) {
+			String city = request.getParameter("city");
+			List<Fighter> fighersObjectInOneCity=daoM.FightersInOneCity(city);
+			session.setAttribute("AllfighersObjectInOneCity",
+					fighersObjectInOneCity);
+			nextPage = "/admin/fightersInOneCity.jsp";
+
+		}
+		// log out
+		if (submitType.equals("LogOut")) {
+			session.invalidate();
+			nextPage = "../index.jsp";
+		}
+LOG.info("***************************"+nextPage);
+		RequestDispatcher dispatcher = request.getRequestDispatcher(nextPage);
+		dispatcher.forward(request, response);
+
+	}
+	
+	
+	
+	
+	
+
+//	private Date parseDate(String yyyyMMdd) {
+//		SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+//		java.util.Date parsed = null;
+//		try {
+//			parsed = format.parse(yyyyMMdd);
+//		} catch (ParseException e) {
+//			e.printStackTrace();
+//		}
+//		java.sql.Date sql = new java.sql.Date(parsed.getTime());
+//		return sql;
+//	}
+}

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+<form action="j_security_check" method="post">
+
+<label>Username <input name="j_username"/></label><br>
+<label>Password<input name="j_password"/></label><br>
+<label>Role<input name="role"/></label><br>
+<input type="Submit" name="Submit" value="Login"/>
+
+
+
+
+
+</form>
+
+</body>
+</html>

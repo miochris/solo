@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" type="text/css" href="../css/style.css">
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+<p> TEST</p>
+	<!-- show Fighter list -->
+
+	<form action="MemberServlet" method="post">
+
+		<input type="Submit" name="Submit" value="AllFighterList" />
+	</form>
+
+
+	<!-- add new fighter -->
+
+
+	<a href="../member/AddNewFighter.html">add new fighter</a>
+	<br>
+
+
+	<!-- show other fighters in your city -->
+	<form action="MemberServlet" method="post">
+
+		<input type="Submit" name="Submit" value="OtherFightersInYourCity" />
+	</form>
+
+
+
+	<!-- Log out -->
+
+	<form action="MemberServlet" method="post">
+		<input type="Submit" name="Submit" value="LogOut" />
+	</form>
+
+
+
+
+
+</body>
+</html>

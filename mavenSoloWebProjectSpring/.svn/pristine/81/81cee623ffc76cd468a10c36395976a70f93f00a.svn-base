@@ -1,0 +1,196 @@
+package com.fdmgroup.market.servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.EntityTransaction;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.log4j.Logger;
+
+import com.fdmgroup.market.controller.Controller;
+import com.fdmgroup.market.dao.FighterDAO;
+import com.fdmgroup.market.dao.MemberDAO;
+import com.fdmgroup.market.entity.Cat;
+import com.fdmgroup.market.entity.Dog;
+import com.fdmgroup.market.entity.Fighter;
+import com.fdmgroup.market.entity.Member;
+
+/**
+ * Servlet implementation class MemberRegisterServlet
+ */
+public class MemberRegisterServlet extends HttpServlet {
+	public static final Logger LOG = Logger
+			.getLogger(MemberRegisterServlet.class);
+	private static final long serialVersionUID = 1L;
+
+	protected void doPost(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+
+		EntityManagerFactory enMgFac = (EntityManagerFactory) getServletContext()
+				.getAttribute("enMgFac");
+		EntityManager enMg = enMgFac.createEntityManager();
+		EntityTransaction tx = enMg.getTransaction();
+		Controller controller = new Controller(enMg);
+
+		HttpSession session = request.getSession();
+
+		MemberDAO daoM = new MemberDAO(enMg);
+		FighterDAO daoF = new FighterDAO(enMg);
+		String nextPage = null;
+		tx.begin();
+		String submitType = request.getParameter("Submit");
+//		// add member
+//
+//		if (submitType.equals("Register")) {
+//			String name = request.getParameter("name");
+//			String balance = request.getParameter("balance");
+//			// String name = (String) session.getAttribute("name");
+//			// String balance = (String) session.getAttribute("balance");
+//			Member member = new Member(name, Double.parseDouble(balance));
+//			// controller.addMember(member);
+//			daoM.addNewMember(member);
+//			// enMg.persist(member);
+//			tx.commit();
+//			enMg.close();
+////			request.setAttribute("registededMember", member);
+//			 session.setAttribute("registededMember", member);
+//			nextPage = "index.jsp";
+//
+//		}
+
+		// String name = request.getParameter("name");
+		// String balance = request.getParameter("balance");
+		// // String name = (String) session.getAttribute("name");
+		// // String balance = (String) session.getAttribute("balance");
+		// Member member = new Member(name, Double.parseDouble(balance));
+		// // controller.addMember(member);
+		// daoM.addNewMember(member);
+		// // enMg.persist(member);
+
+		// find member and list fighters
+		if (submitType.equals("FighterList")) {
+			String mfId = request.getParameter("memberId");
+			System.out.println(mfId + "   *****************************");
+			System.out.println("*****************************member id :"
+					+ Integer.parseInt(mfId));
+			Member memberFound = daoM.getMemberById(Integer.parseInt(mfId));
+
+			List<Fighter> fighterList = memberFound.getFighterList();
+
+			tx.commit();
+			enMg.close();
+			session.setAttribute("memberForList",memberFound);
+			
+			session.setAttribute("fighterList", fighterList);
+			nextPage = "/member/FighterList.jsp";
+		}
+
+		// add fighter
+
+		if (submitType.equals("AddFighter")) {
+			String fighterType = request.getParameter("fighterType");
+			String name = request.getParameter("name");
+			int nOfW = Integer.parseInt(request.getParameter("nOfW"));
+			int nOfL = Integer.parseInt(request.getParameter("nOfL"));
+			int speed = Integer.parseInt(request.getParameter("speed"));
+			Double price = Double.parseDouble(request.getParameter("price"));
+			System.out.println(fighterType + "8888888888888888888888");
+			if (fighterType.equals("cat")) {
+				System.out.println(fighterType + "8888888888888888888888");
+				Cat newAddedFighter = new Cat(name, nOfW, nOfL, speed, price);
+				daoF.addCat(newAddedFighter);
+				tx.commit();
+				enMg.close();
+				session.setAttribute("newAddedFighter", newAddedFighter);
+			}
+			if (fighterType.equals("dog")) {
+				Dog newAddedFighter = new Dog(name, nOfW, nOfL, speed, price);
+				daoF.addDog(newAddedFighter);
+//				LOG.info("member id" + mfId);
+				// LOG.info("owner's id: "+newAddedFighter.getMember().getId());
+				Member member=(Member) session.getAttribute("memberForList");
+				daoM.addFighterToNewMember(newAddedFighter,member);
+				LOG.info("owner's id: " + newAddedFighter.getMember().getId());
+//				LOG.info("member id " + mfId);
+				tx.commit();
+				enMg.close();
+				session.setAttribute("newAddedFighter", newAddedFighter);
+			}
+
+			nextPage = "FighterList.jsp";
+		}
+ 
+		// list fighters in same city for admin
+		if (submitType.equals("FightersInSameCity")) {
+			String city = request.getParameter("city");
+			// String city = (String) session.getAttribute("city");
+
+			List<Integer> fighersInOneCity = new ArrayList<Integer>();
+			List<Fighter> fighersObjectInOneCity = new ArrayList<Fighter>();
+
+			// if option = cat
+			fighersInOneCity = daoM.FightersInOneCity(city);
+			for (int fId : fighersInOneCity) {
+				fighersObjectInOneCity.add(daoF.getFighter(fId));
+
+			}
+
+			tx.commit();
+			enMg.close();
+			// request.setAttribute("fighersObjectInOneCity",
+			// fighersObjectInOneCity);
+			// request.setAttribute("city", city);
+			session.setAttribute("fighersObjectInOneCity",
+					fighersObjectInOneCity);
+			session.setAttribute("city", city);
+			nextPage = "/member/fighersInOneCity.jsp";
+		}
+		
+		
+//		 list fighters in your city for member
+//		String showFightersInYourCity = request.getParameter("showFightersInYourCity");
+				if (submitType.equals("buyNewFighter")) {
+					Member member=(Member) session.getAttribute("memberForList");
+					LOG.info("member id ************  "+member.getId());
+					String city=member.getAddress().getCity().toString();
+					// String city = (String) session.getAttribute("city");
+
+					List<Integer> FightersInYourCityInt = new ArrayList<Integer>();
+					List<Fighter> FightersInYourCity = new ArrayList<Fighter>();
+
+					// if option = cat
+					FightersInYourCityInt = daoM.FightersInYourCity(city,member.getId());
+////					fighersInOneCity = daoM.FightersInOneCity(city);
+					for (int fId : FightersInYourCityInt) {
+						FightersInYourCity.add(daoF.getFighter(fId));
+
+					}
+
+					tx.commit();
+					enMg.close();
+					// request.setAttribute("fighersObjectInOneCity",
+					// fighersObjectInOneCity);
+					// request.setAttribute("city", city);
+					session.setAttribute("FightersInYourCity",
+							FightersInYourCity);
+					session.setAttribute("city", city);
+					nextPage = "/member/fightersInMembersOwnCity.jsp";
+					                    
+				}
+		
+
+		RequestDispatcher dispatcher = request.getRequestDispatcher(nextPage);
+		dispatcher.forward(request, response);
+
+
+	}
+}

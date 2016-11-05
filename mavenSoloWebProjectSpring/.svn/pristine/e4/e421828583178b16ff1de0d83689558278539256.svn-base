@@ -1,0 +1,197 @@
+package com.fdmgroup.market.entity;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+
+import com.fdmgroup.market.listeners.AgeCalculatorListener;
+import com.fdmgroup.market.listeners.MemberNameValidationListener;
+
+@Entity
+@EntityListeners({
+	AgeCalculatorListener.class,
+	MemberNameValidationListener.class
+})
+@Table(name = "member")
+public class Member implements Serializable {
+	private static final long serialVersionUID = 93749238472398L;
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@OrderBy("id asc")
+	@Column
+	private int id;
+	@Column
+	private String name;
+	@Column
+	private double balance;
+
+	@OneToOne
+	private Address address;
+
+	@Column
+	@Temporal(TemporalType.DATE)
+	private Date dateOfBirth;
+
+	@Transient
+	private Integer age;
+
+	
+	@OneToMany(mappedBy = "member", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	private List<Fighter> fighterList = new ArrayList<Fighter>();
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "dateJoined", insertable = true, updatable = false)
+	private Date dateJoined;
+
+	// insertable= true, updatedtime not null when created.
+	@Column(name = "updatedTime", insertable = true, updatable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date updatedTime;
+
+	@PrePersist
+	void onCreate() {
+		updatedTime = dateJoined = new Date();
+	}
+
+	@PreUpdate
+	void onUpdate() {
+		updatedTime = new Date();
+	}
+
+
+	public Member() {
+	}
+
+	public Member(String name, double balance) {
+		super();
+		this.name = name;
+		this.balance = balance;
+	}
+
+	public void addFighter(Fighter fighter) {
+		fighterList.add(fighter);
+		// if(item.getMember()!=this){
+		fighter.setMember(this);
+		// }
+
+	}
+
+	
+
+	public void removeFighter(Fighter fighter) {
+		fighterList.remove(fighter);
+		fighter.setMember(null);
+
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public double getBalance() {
+		return balance;
+	}
+
+	public void setBalance(double balance) {
+		this.balance = balance;
+	}
+
+	public Address getAddress() {
+		return address;
+	}
+
+	public void setAddress(Address address) {
+		this.address = address;
+	}
+
+	public Date getDateOfBirth() {
+		return dateOfBirth;
+	}
+
+	public void setDateOfBirth(Date dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
+	}
+
+	public Integer getAge() {
+		return age;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
+	}
+
+	public List<Fighter> getFighterList() {
+		return fighterList;
+	}
+
+	public void setFighterList(List<Fighter> fighterList) {
+		this.fighterList = fighterList;
+	}
+
+	public Date getDateJoined() {
+		return dateJoined;
+	}
+
+	public void setDateJoined(Date dateJoined) {
+		this.dateJoined = dateJoined;
+	}
+
+	public Date getUpdatedTime() {
+		return updatedTime;
+	}
+
+	public void setUpdatedTime(Date updatedTime) {
+		this.updatedTime = updatedTime;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	@Override
+	public String toString() {
+		return "Member [id=" + id + ", name=" + name + ", balance=" + balance
+				+ ", address=" + address + ", dateOfBirth=" + dateOfBirth
+				+ ", age=" + age + "]";
+	}
+
+	
+
+
+
+	
+
+}

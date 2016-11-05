@@ -1,0 +1,38 @@
+package com.fdmgroup.market.entity;
+
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+@Entity
+public class Cat extends Fighter implements Serializable{
+	@Column
+	private String favoriteFish;
+
+	
+	public Cat() {
+	}
+	public Cat(String name, int nOfW, int nOfL, int speed, double price) {
+		this.setName(name);
+		this.setnOfW(nOfW);
+		this.setnOfL(nOfL);
+		this.setSpeed(speed);
+		this.setPrice(price);
+		
+	}
+	
+	public String getType() {
+		return "cat";
+	}
+	
+	@Override
+	public String toString() {
+		return "Cat [getId()=" + getId() + ", getName()=" + getName()
+				+ ", getnOfW()=" + getnOfW() + ", getnOfL()=" + getnOfL()
+				+ ", getPrice()=" + getPrice() + ", getStrehgth()="
+				+ getStrehgth() + "]";
+	}
+
+}

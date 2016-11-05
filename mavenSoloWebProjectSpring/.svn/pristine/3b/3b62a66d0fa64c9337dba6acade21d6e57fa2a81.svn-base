@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<!-- Register new member -->
+
+
+
+
+
+	<form action="AdminServlet" method="post">
+
+		<br> <label>Member/Admin Name <input name="name" /></label> <br>
+		<label>Tup up your account<input name="balance" /></label> <br>
+		<label>street<input name="street" /></label> <br> <label>postcode<input
+			name="postcode" /></label> <br>
+		<!--  <label>city<input type= name="city" /></label> -->
+
+		<label> city <select name="city">
+				<option value="London" selected>London</option>
+				<option value="NY">NY</option>
+				<option value="Tokyo">Tokyo</option>
+		</select>
+		</label><br> <label>password<input type="password"
+			name="password" /></label><br> <label> DoB <input
+			type="datetime" name="dob" />
+		</label> <br> <label> Role <select name="role">
+				<option value="admin">Admin</option>
+				<option value="member" selected>Member</option>
+		</select>
+		</label><br> <input type="Submit" name="Submit" value="Register" />
+
+	</form>
+
+</body>
+</html>

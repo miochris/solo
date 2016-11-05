@@ -1,0 +1,42 @@
+package com.fdmgroup.market.entity;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
+import com.fdmgroup.market.enums.Role;
+
+
+@Entity
+@Table(name="Users")
+public class UsersForLogin {
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE)
+	@Column
+	private int id;
+	
+	@Column
+	private String name;
+	
+	@Column
+	private String password ;
+	
+	@Enumerated(EnumType.STRING)
+	@Column
+	private Role role;
+	
+	public UsersForLogin(){
+		
+	}
+	public UsersForLogin(String name, String password){
+		this.name=name;
+		this.password=password;
+		
+	}
+
+}

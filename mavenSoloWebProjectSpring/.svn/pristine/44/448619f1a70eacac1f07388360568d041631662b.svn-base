@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+<!-- add new member -->	
+<a href="../admin/AddNewMember.html">add new member</a><br> 
+
+<!-- add new member -->	
+<a href="../admin/AddNewAdmin.html">add new admin</a><br> 
+
+<!--  show member list-->
+
+<form action="AdminServlet" method="post">
+
+		show all members <br> <input
+			type="Submit" name="Submit" value="AllMemberList" />
+	</form>
+
+<!-- show All Fighter list -->	
+
+	<form action="AdminServlet" method="post">
+
+		<input
+			type="Submit" name="Submit" value="AllFighterList" />
+	</form>
+
+
+	<!-- show one member's Fighter list -->	
+
+	<form action="AdminServlet" method="post">
+	show  fighter of member <input name="member" /> <br> 
+
+		<input
+			type="Submit" name="Submit" value="OneMembersFighterList" />
+	</form>
+	
+<!-- show Fighters in One city -->		
+		<form action="AdminServlet" method="post">
+
+		show  fighter in same city <input name="city" /> <br> 
+		
+		<input type="Submit" name = "Submit" value="FightersInOneCity" />
+	</form>
+	
+	
+	<!-- Log out -->
+	
+	<form action="AdminServlet" method="post">
+
+		
+		
+		<input type="Submit" name = "Submit" value="LogOut" />
+	</form>
+</body>
+</html>
